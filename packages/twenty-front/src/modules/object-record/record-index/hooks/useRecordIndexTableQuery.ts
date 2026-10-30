@@ -2,6 +2,8 @@ import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadata
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { useRelevantRecordsGqlFields } from '@/object-record/record-field/hooks/useRelevantRecordsGqlFields';
 import { useFindManyRecordIndexTableParams } from '@/object-record/record-index/hooks/useFindManyRecordIndexTableParams';
+import { recordIndexGroupFieldMetadataItemComponentState } from '@/object-record/record-index/states/recordIndexGroupFieldMetadataComponentState';
+import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 
 export const useRecordIndexTableQuery = (objectNameSingular: string) => {
   const params = useFindManyRecordIndexTableParams(objectNameSingular);
@@ -10,8 +12,15 @@ export const useRecordIndexTableQuery = (objectNameSingular: string) => {
     objectNameSingular,
   });
 
+  const recordIndexGroupFieldMetadataItem = useAtomComponentStateValue(
+    recordIndexGroupFieldMetadataItemComponentState,
+  );
+
+  // Each group's query filters on the group field: its records must carry it,
+  // or optimistic effects consider them outside the group and drop them
   const recordGqlFields = useRelevantRecordsGqlFields({
     objectMetadataItem,
+    additionalFieldMetadataIds: [recordIndexGroupFieldMetadataItem?.id],
   });
 
   const {
